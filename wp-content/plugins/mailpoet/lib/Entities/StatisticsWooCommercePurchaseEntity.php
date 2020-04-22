@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) exit;
 
 use MailPoet\Doctrine\EntityTraits\AutoincrementedIdTrait;
 use MailPoet\Doctrine\EntityTraits\CreatedAtTrait;
+use MailPoet\Doctrine\EntityTraits\SafeToOneAssociationLoadTrait;
 use MailPoet\Doctrine\EntityTraits\UpdatedAtTrait;
 use MailPoetVendor\Doctrine\ORM\Mapping as ORM;
 
@@ -18,18 +19,19 @@ class StatisticsWooCommercePurchaseEntity {
   use AutoincrementedIdTrait;
   use CreatedAtTrait;
   use UpdatedAtTrait;
+  use SafeToOneAssociationLoadTrait;
 
   /**
    * @ORM\ManyToOne(targetEntity="MailPoet\Entities\NewsletterEntity")
    * @ORM\JoinColumn(name="newsletter_id", referencedColumnName="id")
-   * @var NewsletterEntity
+   * @var NewsletterEntity|null
    */
   private $newsletter;
 
   /**
    * @ORM\ManyToOne(targetEntity="MailPoet\Entities\SendingQueueEntity")
    * @ORM\JoinColumn(name="queue_id", referencedColumnName="id")
-   * @var SendingQueueEntity
+   * @var SendingQueueEntity|null
    */
   private $queue;
 
@@ -43,7 +45,7 @@ class StatisticsWooCommercePurchaseEntity {
   /**
    * @ORM\ManyToOne(targetEntity="MailPoet\Entities\StatisticsClickEntity")
    * @ORM\JoinColumn(name="click_id", referencedColumnName="id")
-   * @var StatisticsClickEntity
+   * @var StatisticsClickEntity|null
    */
   private $click;
 
@@ -72,5 +74,37 @@ class StatisticsWooCommercePurchaseEntity {
     $this->orderId = $orderId;
     $this->orderCurrency = $orderCurrency;
     $this->orderPriceTotal = $orderPriceTotal;
+  }
+
+  /**
+   * @return NewsletterEntity|null
+   */
+  public function getNewsletter() {
+    $this->safelyLoadToOneAssociation('newsletter');
+    return $this->newsletter;
+  }
+
+  /**
+   * @return SendingQueueEntity|null
+   */
+  public function getQueue() {
+    $this->safelyLoadToOneAssociation('queue');
+    return $this->queue;
+  }
+
+  /**
+   * @return SubscriberEntity|null
+   */
+  public function getSubscriber() {
+    $this->safelyLoadToOneAssociation('subscriber');
+    return $this->subscriber;
+  }
+
+  /**
+   * @return StatisticsClickEntity|null
+   */
+  public function getClick() {
+    $this->safelyLoadToOneAssociation('click');
+    return $this->click;
   }
 }

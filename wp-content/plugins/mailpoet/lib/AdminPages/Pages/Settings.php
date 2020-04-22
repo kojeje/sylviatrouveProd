@@ -78,15 +78,17 @@ class Settings {
       'premium_key_valid' => !empty($premiumKeyValid),
       'mss_active' => Bridge::isMPSendingServiceEnabled(),
       'mss_key_valid' => !empty($mpApiKeyValid),
-      'members_plugin_active' => $this->wp->isPluginActive('members/members.php'),
       'pages' => Pages::getAll(),
       'current_user' => $this->wp->wpGetCurrentUser(),
-      'linux_cron_path' => dirname(dirname(dirname(__DIR__))),
       'is_woocommerce_active' => $this->woocommerceHelper->isWooCommerceActive(),
-      'ABSPATH' => ABSPATH,
+      'is_members_plugin_active' => $this->wp->isPluginActive('members/members.php'),
       'hosts' => [
         'web' => Hosts::getWebHosts(),
         'smtp' => Hosts::getSMTPHosts(),
+      ],
+      'paths' => [
+        'root' => ABSPATH,
+        'plugin' => dirname(dirname(dirname(__DIR__))),
       ],
       'built_in_captcha_supported' => $this->captcha->isSupported(),
     ];

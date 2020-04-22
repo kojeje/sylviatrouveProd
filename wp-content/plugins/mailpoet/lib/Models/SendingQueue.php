@@ -62,6 +62,7 @@ class SendingQueue extends Model {
     if ($this->countProcessed === $this->countTotal) {
       return $this->complete();
     } else {
+      $this->newsletter()->findOne()->setStatus(Newsletter::STATUS_SENDING);
       return $this->task()->findOne()->resume();
     }
   }

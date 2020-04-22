@@ -37,8 +37,7 @@ class UnauthorizedEmailNotice {
   public function display($validationError) {
     $message = $this->getMessageText($validationError);
     $message .= $this->getSettingsButtons($validationError);
-    $message .= $this->getAuthorizationLink($validationError);
-    $message .= $this->getResumeSendingButton();
+    $message .= $this->getFixThisButton();
     $extraClasses = 'mailpoet-js-error-unauthorized-emails-notice';
     Notice::displayError($message, $extraClasses, self::OPTION_NAME, false, false);
   }
@@ -61,18 +60,8 @@ class UnauthorizedEmailNotice {
     return $buttons;
   }
 
-  private function getAuthorizationLink($validationError) {
-    $email = $validationError['invalid_sender_address'];
-    $authorizeLink = $this->wp->_x('Authorize %s', 'Link for user to authorize their email address', 'mailpoet');
-    $authorizeLink = str_replace('%s', EscapeHelper::escapeHtmlText($email), $authorizeLink);
-    $authorizeLink = Helpers::replaceLinkTags("[link]{$authorizeLink}[/link]", 'https://account.mailpoet.com/authorization', ['target' => '_blank']);
-    $html = '<p><b>' . $this->wp->_x('OR', 'User has to choose between two options', 'mailpoet') . '</b></p>';
-    $html .= "<p>$authorizeLink</p>";
-    return $html;
-  }
-
-  private function getResumeSendingButton() {
-    $button = '<button class="button button-primary mailpoet-js-button-resume-sending">' . $this->wp->__('Resume sending', 'mailpoet') . '</button>';
+  private function getFixThisButton() {
+    $button = '<button class="button button-primary mailpoet-js-button-fix-this">' . $this->wp->__('Fix this!', 'mailpoet') . '</button>';
     return "<p>$button</p>";
   }
 }

@@ -8,8 +8,10 @@ if (!defined('ABSPATH')) exit;
 use MailPoet\API\JSON\Endpoint as APIEndpoint;
 use MailPoet\API\JSON\Error as APIError;
 use MailPoet\Config\AccessControl;
+use MailPoet\Config\ServicesChecker;
 use MailPoet\Cron\Workers\InactiveSubscribers;
 use MailPoet\Cron\Workers\WooCommerceSync;
+use MailPoet\Mailer\MailerLog;
 use MailPoet\Models\Form;
 use MailPoet\Models\ScheduledTask;
 use MailPoet\Services\AuthorizedEmailsController;
@@ -33,6 +35,9 @@ class Settings extends APIEndpoint {
   /** @var TransactionalEmails */
   private $wcTransactionalEmails;
 
+  /** @var ServicesChecker */
+  private $servicesChecker;
+
   public $permissions = [
     'global' => AccessControl::PERMISSION_MANAGE_SETTINGS,
   ];
@@ -41,12 +46,14 @@ class Settings extends APIEndpoint {
     SettingsController $settings,
     Bridge $bridge,
     AuthorizedEmailsController $authorizedEmailsController,
-    TransactionalEmails $wcTransactionalEmails
+    TransactionalEmails $wcTransactionalEmails,
+    ServicesChecker $servicesChecker
   ) {
     $this->settings = $settings;
     $this->bridge = $bridge;
     $this->authorizedEmailsController = $authorizedEmailsController;
     $this->wcTransactionalEmails = $wcTransactionalEmails;
+    $this->servicesChecker = $servicesChecker;
   }
 
   public function get() {
@@ -76,6 +83,29 @@ class Settings extends APIEndpoint {
       }
       return $this->successResponse($this->settings->getAll());
     }
+  }
+
+  public function setAuthorizedFromAddress($data = []) {
+    $address = $data['address'] ?? null;
+    if (!$address) {
+      return $this->badRequest([
+        APIError::BAD_REQUEST => WPFunctions::get()->__('No email address specified.', 'mailpoet'),
+      ]);
+    }
+    $address = trim($address);
+
+    try {
+      $this->authorizedEmailsController->setFromEmailAddress($address);
+    } catch (\InvalidArgumentException $e) {
+      return $this->badRequest([
+        APIError::UNAUTHORIZED => WPFunctions::get()->__('Can’t use this email yet! Please authorize it first.', 'mailpoet'),
+      ]);
+    }
+
+    if (!$this->servicesChecker->isMailPoetAPIKeyPendingApproval()) {
+      MailerLog::resumeSending();
+    }
+    return $this->successResponse();
   }
 
   private function onSettingsChange($oldSettings, $newSettings) {

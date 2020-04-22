@@ -152,6 +152,9 @@ class Scheduler {
         $queue->delete();
         return false;
       }
+      if ($this->verifySubscriber($subscriber, $queue) === false) {
+        return false;
+      }
     }
 
     $queue->status = null;

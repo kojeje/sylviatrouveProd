@@ -107,6 +107,7 @@ class Hooks {
     $this->setupPostNotifications();
     $this->setupWooCommerceSettings();
     $this->dynamicSegmentHooks->init();
+    $this->setupFooter();
   }
 
   public function initEarlyHooks() {
@@ -367,5 +368,20 @@ class Hooks {
       [$this->postNotificationScheduler, 'transitionHook'],
       10, 3
     );
+  }
+
+  public function setupFooter() {
+    if (!Menu::isOnMailPoetAdminPage()) {
+      return;
+    }
+    $this->wp->addFilter(
+      'admin_footer_text',
+      [$this, 'setFooter'],
+      1, 1
+    );
+  }
+
+  public function setFooter($text) {
+    return '<a href="https://feedback.mailpoet.com/" rel="noopener noreferrer" target="_blank">Give feedback</a>';
   }
 }

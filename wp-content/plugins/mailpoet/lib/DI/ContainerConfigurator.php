@@ -51,7 +51,6 @@ class ContainerConfigurator implements IContainerConfigurator {
     $container->autowire(\MailPoet\AdminPages\Pages\OldSettings::class)->setPublic(true);
     $container->autowire(\MailPoet\AdminPages\Pages\Settings::class)->setPublic(true);
     $container->autowire(\MailPoet\AdminPages\Pages\Subscribers::class)->setPublic(true);
-    $container->autowire(\MailPoet\AdminPages\Pages\SubscribersAPIKeyInvalid::class)->setPublic(true);
     $container->autowire(\MailPoet\AdminPages\Pages\SubscribersExport::class)->setPublic(true);
     $container->autowire(\MailPoet\AdminPages\Pages\SubscribersImport::class)->setPublic(true);
     $container->autowire(\MailPoet\AdminPages\Pages\Update::class)->setPublic(true);
@@ -188,6 +187,7 @@ class ContainerConfigurator implements IContainerConfigurator {
     $container->autowire(\MailPoet\Form\Block\Divider::class);
     $container->autowire(\MailPoet\Form\Block\Html::class);
     $container->autowire(\MailPoet\Form\Block\Heading::class);
+    $container->autowire(\MailPoet\Form\Block\Image::class);
     $container->autowire(\MailPoet\Form\Block\Paragraph::class);
     $container->autowire(\MailPoet\Form\Block\Radio::class);
     $container->autowire(\MailPoet\Form\Block\Segment::class);
@@ -237,6 +237,7 @@ class ContainerConfigurator implements IContainerConfigurator {
     $container->autowire(\MailPoet\Segments\SubscribersListings::class)->setPublic(true);
     $container->autowire(\MailPoet\Segments\WooCommerce::class)->setPublic(true);
     $container->autowire(\MailPoet\Segments\SubscribersFinder::class);
+    $container->autowire(\MailPoet\Segments\SegmentsRepository::class);
     // Services
     $container->autowire(\MailPoet\Services\Bridge::class)->setPublic(true);
     $container->autowire(\MailPoet\Services\AuthorizedEmailsController::class);

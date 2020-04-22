@@ -179,6 +179,50 @@ class StatisticsWooCommercePurchaseEntity extends \MailPoet\Entities\StatisticsW
     /**
      * {@inheritDoc}
      */
+    public function getNewsletter()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getNewsletter', []);
+
+        return parent::getNewsletter();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getQueue()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getQueue', []);
+
+        return parent::getQueue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSubscriber()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getSubscriber', []);
+
+        return parent::getSubscriber();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getClick()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getClick', []);
+
+        return parent::getClick();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getId()
     {
         if ($this->__isInitialized__ === false) {

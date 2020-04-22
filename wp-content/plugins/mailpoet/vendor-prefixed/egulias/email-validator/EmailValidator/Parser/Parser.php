@@ -141,7 +141,7 @@ abstract class Parser
     protected function escaped()
     {
         $previous = $this->lexer->getPrevious();
-        if ($previous['type'] === \MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_BACKSLASH && $this->lexer->token['type'] !== \MailPoetVendor\Egulias\EmailValidator\EmailLexer::GENERIC) {
+        if ($previous && $previous['type'] === \MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_BACKSLASH && $this->lexer->token['type'] !== \MailPoetVendor\Egulias\EmailValidator\EmailLexer::GENERIC) {
             return \true;
         }
         return \false;

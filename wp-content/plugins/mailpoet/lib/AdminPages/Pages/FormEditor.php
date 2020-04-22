@@ -99,6 +99,7 @@ class FormEditor {
       'sub_menu' => 'mailpoet-forms',
       'custom_fields' => $this->customFieldsResponseBuilder->buildBatch($customFields),
     ];
+    $this->wp->wpEnqueueMedia();
 
     $this->pageRenderer->displayPage('form/editor.html', $data);
   }

@@ -1,5 +1,45 @@
 # Change Log
 
+## [3.0.4] - 2020-04-20
+
+### Fixed
+- Inaccessible settings page in Admin Access
+
+### Added
+- Filter for applying custom validation to settings
+
+## [3.0.3] - 2020-04-15
+
+### Fixed
+
+- PHP warnings being thrown
+- Make sure admin menu is always accessible
+
+### Changed
+
+- Display icons using file_get_contents() instead of include() to prevent executing them as PHP
+
+## [3.0.2] - 2020-04-09
+
+### Fixed
+
+- Minimized SVG icons to fix issues with parsing them
+
+## [3.0.1] - 2020-04-09
+
+- Some JS and image files weren't checked in via SVN, so bumped version to add them
+
+## [3.0] - 2020-04-08
+
+### Added
+
+- Rolled all add-ons into core.
+
+### Changed
+
+- Consolidated all Members-related settings under one admin menu item.
+- Made login and user widgets enabled by default, and removed settings.
+
 ## [2.2.0] - 2019-07-20
 
 ### Added

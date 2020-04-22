@@ -5,6 +5,7 @@ namespace MailPoet\Mailer;
 if (!defined('ABSPATH')) exit;
 
 
+use MailPoet\DI\ContainerWrapper;
 use MailPoet\Mailer\Methods\AmazonSES;
 use MailPoet\Mailer\Methods\ErrorMappers\AmazonSESMapper;
 use MailPoet\Mailer\Methods\ErrorMappers\MailPoetMapper;
@@ -16,7 +17,6 @@ use MailPoet\Mailer\Methods\PHPMail;
 use MailPoet\Mailer\Methods\SendGrid;
 use MailPoet\Mailer\Methods\SMTP;
 use MailPoet\Services\AuthorizedEmailsController;
-use MailPoet\Services\Bridge;
 use MailPoet\Settings\SettingsController;
 
 class Mailer {
@@ -77,7 +77,7 @@ class Mailer {
           $this->sender,
           $this->replyTo,
           new MailPoetMapper(),
-          new AuthorizedEmailsController($this->settings, new Bridge)
+          ContainerWrapper::getInstance()->get(AuthorizedEmailsController::class)
         );
         break;
       case self::METHOD_SENDGRID:

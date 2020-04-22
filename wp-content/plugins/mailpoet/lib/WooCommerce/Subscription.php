@@ -9,6 +9,7 @@ use MailPoet\Models\Segment;
 use MailPoet\Models\Subscriber;
 use MailPoet\Models\SubscriberSegment;
 use MailPoet\Settings\SettingsController;
+use MailPoet\Subscribers\ConfirmationEmailMailer;
 use MailPoet\Subscribers\Source;
 use MailPoet\Util\Helpers;
 use MailPoet\WP\Functions as WPFunctions;
@@ -24,12 +25,17 @@ class Subscription {
   /** @var WPFunctions */
   private $wp;
 
+  /** @var ConfirmationEmailMailer */
+  private $confirmationEmailMailer;
+
   public function __construct(
     SettingsController $settings,
+    ConfirmationEmailMailer $confirmationEmailMailer,
     WPFunctions $wp
   ) {
     $this->settings = $settings;
     $this->wp = $wp;
+    $this->confirmationEmailMailer = $confirmationEmailMailer;
   }
 
   public function extendWooCommerceCheckoutForm() {
@@ -96,15 +102,18 @@ class Subscription {
       $this->updateSubscriberStatus($subscriber);
       return false;
     }
-
-    // checkbox is checked
     $subscriber->source = Source::WOOCOMMERCE_CHECKOUT;
-    $subscriber->status = Subscriber::STATUS_SUBSCRIBED;
-    if (empty($subscriber->confirmedIp) && empty($subscriber->confirmedAt)) {
-      $subscriber->confirmedIp = Helpers::getIP();
-      $subscriber->setExpr('confirmed_at', 'NOW()');
+
+    $signupConfirmation = $this->settings->get('signup_confirmation');
+    // checkbox is checked
+    if (
+      ($subscriber->status === Subscriber::STATUS_SUBSCRIBED)
+      || ((bool)$signupConfirmation['enabled'] === false)
+    ) {
+      $this->subscribe($subscriber);
+    } else {
+      $this->requireSubscriptionConfirmation($subscriber);
     }
-    $subscriber->save();
 
     SubscriberSegment::subscribeToSegments(
       $subscriber,
@@ -112,6 +121,22 @@ class Subscription {
     );
 
     return true;
+  }
+
+  private function subscribe(Subscriber $subscriber) {
+    $subscriber->status = Subscriber::STATUS_SUBSCRIBED;
+    if (empty($subscriber->confirmedIp) && empty($subscriber->confirmedAt)) {
+      $subscriber->confirmedIp = Helpers::getIP();
+      $subscriber->setExpr('confirmed_at', 'NOW()');
+    }
+    $subscriber->save();
+  }
+
+  private function requireSubscriptionConfirmation(Subscriber $subscriber) {
+    $subscriber->status = Subscriber::STATUS_UNCONFIRMED;
+    $subscriber->save();
+
+    $this->confirmationEmailMailer->sendConfirmationEmail($subscriber);
   }
 
   private function updateSubscriberStatus(Subscriber $subscriber) {

@@ -179,6 +179,39 @@ class StatisticsClickEntity extends \MailPoet\Entities\StatisticsClickEntity imp
     /**
      * {@inheritDoc}
      */
+    public function getNewsletter()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getNewsletter', []);
+
+        return parent::getNewsletter();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getQueue()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getQueue', []);
+
+        return parent::getQueue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getLink()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getLink', []);
+
+        return parent::getLink();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getId()
     {
         if ($this->__isInitialized__ === false) {

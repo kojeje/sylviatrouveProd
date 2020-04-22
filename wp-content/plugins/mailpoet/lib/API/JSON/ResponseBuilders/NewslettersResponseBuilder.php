@@ -13,6 +13,8 @@ use MailPoet\Newsletter\Statistics\NewsletterStatistics;
 use MailPoet\Newsletter\Statistics\NewsletterStatisticsRepository;
 use MailPoetVendor\Doctrine\ORM\EntityManager;
 
+use function MailPoetVendor\array_column;
+
 class NewslettersResponseBuilder {
   const DATE_FORMAT = 'Y-m-d H:i:s';
 
@@ -184,7 +186,9 @@ class NewslettersResponseBuilder {
 
   private function buildQueue(SendingQueueEntity $queue) {
     $task = $queue->getTask();
-
+    if ($task === null) {
+      return null;
+    }
     // the following crazy mix of '$queue' and '$task' comes from 'array_merge($task, $queue)'
     // (MailPoet\Tasks\Sending) which means all equal-named fields will be taken from '$queue'
     return [
@@ -198,8 +202,8 @@ class NewslettersResponseBuilder {
       'updated_at' => $queue->getUpdatedAt()->format(self::DATE_FORMAT),
       'deleted_at' => ($deletedAt = $queue->getDeletedAt()) ? $deletedAt->format(self::DATE_FORMAT) : null,
       'meta' => $queue->getMeta(),
-      'task_id' => (string)$queue->getTask()->getId(), // (string) for BC
-      'newsletter_id' => (string)$queue->getNewsletter()->getId(), // (string) for BC
+      'task_id' => (string)$task->getId(), // (string) for BC
+      'newsletter_id' => ($newsletter = $queue->getNewsletter()) ? (string)$newsletter->getId() : null, // (string) for BC
       'newsletter_rendered_subject' => $queue->getNewsletterRenderedSubject(),
       'count_total' => (string)$queue->getCountTotal(), // (string) for BC
       'count_processed' => (string)$queue->getCountProcessed(), // (string) for BC
@@ -212,19 +216,24 @@ class NewslettersResponseBuilder {
 
     $subqueryQueryBuilder = $this->entityManager->createQueryBuilder();
     $subquery = $subqueryQueryBuilder
-      ->select('MAX(subSq.id)')
+      ->select('MAX(subSq.id) AS maxId')
       ->from(SendingQueueEntity::class, 'subSq')
       ->where('subSq.newsletter IN (:newsletters)')
+      ->setParameter('newsletters', $newsletters)
       ->groupBy('subSq.newsletter')
       ->getQuery();
+    $latestQueueIds = array_column($subquery->getResult(), 'maxId');
+    if (empty($latestQueueIds)) {
+      return [];
+    }
 
     $queryBuilder = $this->entityManager->createQueryBuilder();
     $results = $queryBuilder
       ->select('sq, t, IDENTITY(sq.newsletter)')
       ->from(SendingQueueEntity::class, 'sq')
       ->join('sq.task', 't')
-      ->where('sq.id IN (' . $subquery->getDQL() . ')')
-      ->setParameter('newsletters', $newsletters)
+      ->where('sq.id IN (:sub)')
+      ->setParameter('sub', $latestQueueIds)
       ->getQuery()
       ->getResult();
 

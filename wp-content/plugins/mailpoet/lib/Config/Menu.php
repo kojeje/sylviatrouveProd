@@ -19,7 +19,6 @@ use MailPoet\AdminPages\Pages\RevenueTrackingPermission;
 use MailPoet\AdminPages\Pages\Segments;
 use MailPoet\AdminPages\Pages\Settings;
 use MailPoet\AdminPages\Pages\Subscribers;
-use MailPoet\AdminPages\Pages\SubscribersAPIKeyInvalid;
 use MailPoet\AdminPages\Pages\SubscribersExport;
 use MailPoet\AdminPages\Pages\SubscribersImport;
 use MailPoet\AdminPages\Pages\Update;
@@ -60,7 +59,6 @@ class Menu {
   }
 
   public function init() {
-    $this->checkMailPoetAPIKey();
     $this->checkPremiumKey();
 
     $this->wp->addAction(
@@ -481,9 +479,6 @@ class Menu {
   }
 
   public function newsletters() {
-    if (isset($this->mpApiKeyValid) && $this->mpApiKeyValid === false) {
-      return $this->displayMailPoetAPIKeyInvalid();
-    }
     $this->container->get(Newsletters::class)->render();
   }
 
@@ -501,11 +496,6 @@ class Menu {
 
   public function formEditor() {
     $this->container->get(FormEditor::class)->render();
-  }
-
-  private function displayMailPoetAPIKeyInvalid() {
-    $this->container->get(SubscribersAPIKeyInvalid::class)->render();
-    exit;
   }
 
   public function setPageTitle($title) {
@@ -562,15 +552,6 @@ class Menu {
 
   public static function errorPageCallback() {
     // Used for displaying admin notices only
-  }
-
-  public function checkMailPoetAPIKey(ServicesChecker $checker = null) {
-    if (self::isOnMailPoetAdminPage()) {
-      $showNotices = isset($_REQUEST['page'])
-        && stripos($_REQUEST['page'], self::MAIN_PAGE_SLUG) === false;
-      $checker = $checker ?: $this->servicesChecker;
-      $this->mpApiKeyValid = $checker->isMailPoetAPIKeyValid($showNotices);
-    }
   }
 
   public function checkPremiumKey(ServicesChecker $checker = null) {

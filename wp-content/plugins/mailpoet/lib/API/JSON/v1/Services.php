@@ -10,8 +10,10 @@ use MailPoet\API\JSON\Endpoint as APIEndpoint;
 use MailPoet\API\JSON\Error as APIError;
 use MailPoet\Config\AccessControl;
 use MailPoet\Config\Installer;
+use MailPoet\Config\ServicesChecker;
 use MailPoet\Cron\Workers\KeyCheck\PremiumKeyCheck;
 use MailPoet\Cron\Workers\KeyCheck\SendingServiceKeyCheck;
+use MailPoet\Mailer\MailerLog;
 use MailPoet\Services\Bridge;
 use MailPoet\Services\SPFCheck;
 use MailPoet\Settings\SettingsController;
@@ -40,11 +42,22 @@ class Services extends APIEndpoint {
   /** @var PremiumKeyCheck */
   private $premiumWorker;
 
+  /** @var ServicesChecker */
+  private $servicesChecker;
+
   public $permissions = [
     'global' => AccessControl::PERMISSION_MANAGE_SETTINGS,
   ];
 
-  public function __construct(Bridge $bridge, SettingsController $settings, AnalyticsHelper $analytics, SPFCheck $spfCheck, SendingServiceKeyCheck $mssWorker, PremiumKeyCheck $premiumWorker) {
+  public function __construct(
+    Bridge $bridge,
+    SettingsController $settings,
+    AnalyticsHelper $analytics,
+    SPFCheck $spfCheck,
+    SendingServiceKeyCheck $mssWorker,
+    PremiumKeyCheck $premiumWorker,
+    ServicesChecker $servicesChecker
+  ) {
     $this->bridge = $bridge;
     $this->settings = $settings;
     $this->analytics = $analytics;
@@ -52,6 +65,7 @@ class Services extends APIEndpoint {
     $this->mssWorker = $mssWorker;
     $this->premiumWorker = $premiumWorker;
     $this->dateTime = new DateTime();
+    $this->servicesChecker = $servicesChecker;
   }
 
   public function checkSPFRecord($data = []) {
@@ -79,6 +93,8 @@ class Services extends APIEndpoint {
       ]);
     }
 
+    $wasPendingApproval = $this->servicesChecker->isMailPoetAPIKeyPendingApproval();
+
     try {
       $result = $this->bridge->checkMSSKey($key);
       $this->bridge->storeMSSKeyAndState($key, $result);
@@ -86,6 +102,14 @@ class Services extends APIEndpoint {
       return $this->errorResponse([
         $e->getCode() => $e->getMessage(),
       ]);
+    }
+
+    // pause sending when key is pending approval, resume when not pending anymore
+    $isPendingApproval = $this->servicesChecker->isMailPoetAPIKeyPendingApproval();
+    if (!$wasPendingApproval && $isPendingApproval) {
+      MailerLog::pauseSending(MailerLog::getMailerLog());
+    } elseif ($wasPendingApproval && !$isPendingApproval) {
+      MailerLog::resumeSending();
     }
 
     $state = !empty($result['state']) ? $result['state'] : null;

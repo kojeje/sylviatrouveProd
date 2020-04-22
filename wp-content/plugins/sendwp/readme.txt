@@ -5,7 +5,7 @@ Tags: forms, email, transactional
 Requires at least: 5.1
 Tested up to: 5.3
 Requires PHP: 5.6.0
-Stable Tag: 1.0.2
+Stable Tag: 1.0.3
 License: GPLv2 or later
 
 Say hello to the easy solution to transactional email in WordPress.
@@ -30,11 +30,15 @@ A. No. This plugin only serves to connect you to the SendWP service, so if you d
 
 == Upgrade Notice ==
 
-= 1.0.2 =
+= 1.0.3 =
 
-* Resolved minor errors that were causing php notices to be displayed in the admin dashboard.
+* Resolved an error that was resulting in failure to forward reply to address.
 
 == Changelog ==
+
+= 1.0.3 =
+
+* Resolved an error that was resulting in failure to forward reply to address.
 
 = 1.0.2 =
 

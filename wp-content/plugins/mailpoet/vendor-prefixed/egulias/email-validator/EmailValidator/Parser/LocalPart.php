@@ -21,6 +21,7 @@ class LocalPart extends \MailPoetVendor\Egulias\EmailValidator\Parser\Parser
         $parseDQuote = \true;
         $closingQuote = \false;
         $openedParenthesis = 0;
+        $totalLength = 0;
         while ($this->lexer->token['type'] !== \MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_AT && null !== $this->lexer->token['type']) {
             if ($this->lexer->token['type'] === \MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_DOT && null === $this->lexer->getPrevious()['type']) {
                 throw new \MailPoetVendor\Egulias\EmailValidator\Exception\DotAtStart();
@@ -36,9 +37,8 @@ class LocalPart extends \MailPoetVendor\Egulias\EmailValidator\Parser\Parser
             if ($this->lexer->token['type'] === \MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_CLOSEPARENTHESIS) {
                 if ($openedParenthesis === 0) {
                     throw new \MailPoetVendor\Egulias\EmailValidator\Exception\UnopenedComment();
-                } else {
-                    $openedParenthesis--;
                 }
+                $openedParenthesis--;
             }
             $this->checkConsecutiveDots();
             if ($this->lexer->token['type'] === \MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_DOT && $this->lexer->isNextToken(\MailPoetVendor\Egulias\EmailValidator\EmailLexer::S_AT)) {
@@ -49,10 +49,10 @@ class LocalPart extends \MailPoetVendor\Egulias\EmailValidator\Parser\Parser
             if ($this->isFWS()) {
                 $this->parseFWS();
             }
+            $totalLength += \strlen($this->lexer->token['value']);
             $this->lexer->moveNext();
         }
-        $prev = $this->lexer->getPrevious();
-        if (\strlen($prev['value']) > \MailPoetVendor\Egulias\EmailValidator\Warning\LocalTooLong::LOCAL_PART_LENGTH) {
+        if ($totalLength > \MailPoetVendor\Egulias\EmailValidator\Warning\LocalTooLong::LOCAL_PART_LENGTH) {
             $this->warnings[\MailPoetVendor\Egulias\EmailValidator\Warning\LocalTooLong::CODE] = new \MailPoetVendor\Egulias\EmailValidator\Warning\LocalTooLong();
         }
     }

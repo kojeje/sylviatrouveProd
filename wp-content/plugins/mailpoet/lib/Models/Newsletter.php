@@ -10,6 +10,7 @@ use MailPoet\AutomaticEmails\WooCommerce\Events\FirstPurchase;
 use MailPoet\AutomaticEmails\WooCommerce\Events\PurchasedInCategory;
 use MailPoet\AutomaticEmails\WooCommerce\Events\PurchasedProduct;
 use MailPoet\Entities\NewsletterEntity;
+use MailPoet\Entities\ScheduledTaskEntity;
 use MailPoet\Newsletter\Renderer\Renderer;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Tasks\Sending as SendingTask;
@@ -292,6 +293,13 @@ class Newsletter extends Model {
         'SET t.`deleted_at` = null ' .
         'WHERE q.`newsletter_id` = ' . $this->id
       );
+      // Pause associated running scheduled task
+      ScheduledTask::rawExecute(
+        'UPDATE `' . ScheduledTask::$_table . '` t ' .
+        'JOIN `' . SendingQueue::$_table . '` q ON t.`id` = q.`task_id` ' .
+        'SET t.`status` = "' . ScheduledTaskEntity::STATUS_PAUSED . '" ' .
+        'WHERE q.`newsletter_id` = ' . $this->id . ' AND t.`status` IS NULL'
+      );
       SendingQueue::rawExecute(
         'UPDATE `' . SendingQueue::$_table . '` ' .
         'SET `deleted_at` = null ' .
@@ -299,10 +307,6 @@ class Newsletter extends Model {
       );
     }
 
-    if ($this->status == self::STATUS_SENDING) {
-      $this->set('status', self::STATUS_DRAFT);
-      $this->save();
-    }
     return parent::restore();
   }
 
@@ -334,20 +338,19 @@ class Newsletter extends Model {
           ->findResultSet()
           ->set('deleted_at', null)
           ->save();
+        // Pause associated running scheduled tasks
+        SendingQueue::getTasks()
+          ->whereIn('queues.newsletter_id', $ids)
+          ->whereNull('tasks.status')
+          ->findResultSet()
+          ->set('status', ScheduledTaskEntity::STATUS_PAUSED)
+          ->save();
         SendingQueue::whereIn('newsletter_id', $ids)
           ->whereNotNull('deleted_at')
           ->findResultSet()
           ->set('deleted_at', null)
           ->save();
       }
-    });
-
-    parent::bulkAction($orm, function($ids) {
-      Newsletter::whereIn('id', $ids)
-        ->where('status', Newsletter::STATUS_SENDING)
-        ->findResultSet()
-        ->set('status', Newsletter::STATUS_DRAFT)
-        ->save();
     });
 
     return parent::bulkRestore($orm);

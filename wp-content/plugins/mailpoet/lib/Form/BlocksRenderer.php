@@ -12,6 +12,7 @@ use MailPoet\Form\Block\Date;
 use MailPoet\Form\Block\Divider;
 use MailPoet\Form\Block\Heading;
 use MailPoet\Form\Block\Html;
+use MailPoet\Form\Block\Image;
 use MailPoet\Form\Block\Paragraph;
 use MailPoet\Form\Block\Radio;
 use MailPoet\Form\Block\Segment;
@@ -32,6 +33,9 @@ class BlocksRenderer {
 
   /** @var Html */
   private $html;
+
+  /** @var Image */
+  private $image;
 
   /** @var Radio */
   private $radio;
@@ -70,6 +74,7 @@ class BlocksRenderer {
     Date $date,
     Divider $divider,
     Html $html,
+    Image $image,
     Heading $heading,
     Paragraph $paragraph,
     Radio $radio,
@@ -85,6 +90,7 @@ class BlocksRenderer {
     $this->date = $date;
     $this->divider = $divider;
     $this->html = $html;
+    $this->image = $image;
     $this->radio = $radio;
     $this->segment = $segment;
     $this->select = $select;
@@ -104,6 +110,10 @@ class BlocksRenderer {
 
       case 'heading':
         $html .= $this->heading->render($block);
+        break;
+
+      case 'image':
+        $html .= $this->image->render($block);
         break;
 
       case 'paragraph':

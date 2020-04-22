@@ -14,11 +14,13 @@ if (!defined('ABSPATH')) exit;
  * file that was distributed with this source code.
  */
 use MailPoetVendor\Symfony\Polyfill\Iconv as p;
-if (!\function_exists('iconv')) {
+if (!\defined('ICONV_IMPL')) {
     \define('ICONV_IMPL', 'Symfony');
     \define('ICONV_VERSION', '1.0');
     \define('ICONV_MIME_DECODE_STRICT', 1);
     \define('ICONV_MIME_DECODE_CONTINUE_ON_ERROR', 2);
+}
+if (!\function_exists('iconv')) {
     function iconv($from, $to, $s)
     {
         return \MailPoetVendor\Symfony\Polyfill\Iconv\Iconv::iconv($from, $to, $s);

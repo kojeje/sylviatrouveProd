@@ -179,6 +179,28 @@ class StatisticsUnsubscribeEntity extends \MailPoet\Entities\StatisticsUnsubscri
     /**
      * {@inheritDoc}
      */
+    public function getNewsletter()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getNewsletter', []);
+
+        return parent::getNewsletter();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getQueue()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getQueue', []);
+
+        return parent::getQueue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getId()
     {
         if ($this->__isInitialized__ === false) {

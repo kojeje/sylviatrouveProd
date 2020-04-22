@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
  * file that was distributed with this source code.
  */
 use MailPoetVendor\Symfony\Polyfill\Intl\Idn as p;
-if (!\function_exists('idn_to_ascii')) {
+if (!\defined('IDNA_DEFAULT')) {
     \define('U_IDNA_PROHIBITED_ERROR', 66560);
     \define('U_IDNA_ERROR_START', 66560);
     \define('U_IDNA_UNASSIGNED_ERROR', 66561);
@@ -51,6 +51,8 @@ if (!\function_exists('idn_to_ascii')) {
     \define('IDNA_ERROR_INVALID_ACE_LABEL', 1024);
     \define('IDNA_ERROR_BIDI', 2048);
     \define('IDNA_ERROR_CONTEXTJ', 4096);
+}
+if (!\function_exists('idn_to_ascii')) {
     if (\PHP_VERSION_ID < 70400) {
         function idn_to_ascii($domain, $options = \IDNA_DEFAULT, $variant = \INTL_IDNA_VARIANT_2003, &$idna_info = array())
         {

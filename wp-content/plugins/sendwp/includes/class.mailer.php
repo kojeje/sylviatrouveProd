@@ -79,6 +79,12 @@ class Mailer implements MailerInterface
         }
 
         if($reply_to = $this->getReplyToAddresses()){
+            /**
+             * $reply_to is an array of arrays.
+             * [ [ $address, $name ], [...] ]
+             * To get a string value for the address, we need to reset it twice.
+             */
+            $reply_to = reset($reply_to);
             $args['body']['reply_to'] = reset($reply_to);
         }
 
